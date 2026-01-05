@@ -1,13 +1,33 @@
 const { chromium } = require("playwright");
 const fs = require("fs");
+const path = require("path");
 
 (async () => {
+  // 1. Leer rutas
   const rutas = fs
     .readFileSync("rutas.txt", "utf8")
     .split("\n")
     .map((r) => r.trim())
     .filter(Boolean);
 
+  // 2. Valores reales del select
+  const opciones = [
+    "SINAI-PRINCIPAL",
+    "ZAFIRO",
+    "CONEXION21",
+    "HEMEPA",
+    "COLMARIA",
+    "INMACULADA-GUAJIRA",
+    "MARIAUXILIADORA-CIUDAD-BOLIVAR",
+    "MICROSIC",
+    "SIEMPRESERVER",
+  ];
+
+  // 3. Crear CSV vacío con encabezados
+  const csvFile = path.join(__dirname, "resultados.csv");
+  fs.writeFileSync(csvFile, "Opcion,Ruta,Total\n");
+
+  // 4. Abrir navegador
   const browser = await chromium.launch({ headless: false });
   const page = await browser.newPage();
 
@@ -15,25 +35,30 @@ const fs = require("fs");
     "https://n8nsuper.sysadmin.siempre.net.co/webhook/consultas-internas"
   );
 
-  // 1. Obtener el único iframe
-  const frame = page.frames()[1]; // [0] es la página principal
-  for (const ruta of rutas) {
-    // Seleccionar opción y escribir ruta
-    await frame.locator("#selServidor").selectOption("SINAI-PRINCIPAL");
-    await frame.locator("#txtBuscar").fill(ruta);
+  // 5. Obtener el iframe
+  const frame = page.frames()[1]; // iframe único
 
-    // Click en botón
-    await frame.locator("button.btn.btn-primary").click();
+  // 6. Loop anidado: opciones × rutas
+  for (const opcion of opciones) {
+    for (const ruta of rutas) {
+      await frame.locator("#selServidor").selectOption(opcion);
+      await frame.locator("#txtBuscar").fill(ruta);
+      await frame.locator("button.btn.btn-primary").click();
 
-    // Espera fija de 2 segundos
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Espera fija de 2 segundos para que la página actualice
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Leer el total desde #totalRegistros
-    const totalText = await frame.locator("#totalRegistros").innerText();
-    const total = parseInt(totalText.replace(/\D/g, ""), 10);
+      // Leer el total desde #totalRegistros
+      const totalText = await frame.locator("#totalRegistros").innerText();
+      const total = parseInt(totalText.replace(/\D/g, ""), 10);
 
-    console.log(`${ruta},${total}`);
+      console.log(`Opción: ${opcion} → Ruta: ${ruta} → Total: ${total}`);
+
+      // Guardar en CSV
+      fs.appendFileSync(csvFile, `"${opcion}","${ruta}",${total}\n`);
+    }
   }
 
   await browser.close();
+  console.log(`\n✅ Resultados guardados en: ${csvFile}`);
 })();
