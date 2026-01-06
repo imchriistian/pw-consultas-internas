@@ -1,115 +1,110 @@
-📊 Consulta automática de rutas por servidor (Playwright)
+# Consulta automática de rutas por servidor
 
-Este proyecto automatiza consultas internas usando Playwright, recorriendo múltiples servidores y rutas, y genera un CSV final con el total acumulado por ruta, sin importar el servidor en el que se encuentre la información.
+Este proyecto automatiza consultas internas usando **Playwright**, recorriendo múltiples servidores y rutas, y genera un **CSV final con el total acumulado por ruta**, sin importar el servidor en el que se encuentre la información.
 
-Está pensado para:
+---
 
-Auditorías
+## ¿Qué hace el script?
 
-Validaciones internas
+1. Lee un listado de rutas desde el archivo `rutas.txt`
+2. Recorre cada ruta por todos los servidores configurados
+3. Ejecuta la búsqueda en la web interna
+4. Obtiene el valor del campo `#totalRegistros`
+5. Suma los resultados por ruta
+6. Genera un archivo `resultados.csv` con el total final por cada ruta
 
-Cruces de información entre servidores
+> El resultado **no discrimina por servidor**, solo muestra el total acumulado por ruta.
 
-Generación de reportes rápidos
+---
 
-🧠 ¿Qué hace el script?
+## Ejemplo de rutas.txt
 
-Lee un listado de rutas desde un archivo rutas.txt
+- EvalProm/007/CopiarLogros.aspx
+- EvalProm/007/Indicadores.aspx
+- EvalProm/007/NotasEstudiante.aspx
+- EvalProm/008/Recuperaciones.aspx
 
-Recorre cada ruta por todos los servidores disponibles
+Cada línea representa una ruta que será consultada en todos los servidores.
 
-Ejecuta la consulta en la web interna
+---
 
-Obtiene el valor de #totalRegistros
+## Resultado final (resultados.csv)
 
-Suma los resultados por ruta
-
-Genera un archivo resultados.csv con el total final por cada ruta
-
-📌 No se guarda información por servidor, solo el total acumulado por ruta.
-
-📁 Estructura del proyecto
-📦 proyecto
- ┣ 📜 index.js          # Script principal
- ┣ 📜 rutas.txt         # Listado de rutas a consultar
- ┣ 📜 resultados.csv    # Resultado final (se genera automáticamente)
- ┣ 📜 package.json
- ┗ 📜 README.md
-
-📝 Ejemplo de rutas.txt
-EvalProm/007/CopiarLogros.aspx
-EvalProm/007/Indicadores.aspx
-EvalProm/007/NotasEstudiante.aspx
-EvalProm/008/Recuperaciones.aspx
-
-
-Cada línea representa una ruta que será buscada en todos los servidores.
-
-📊 Resultado final (resultados.csv)
 Ruta,Total
-EvalProm/007/CopiarLogros.aspx,135
-EvalProm/007/Indicadores.aspx,143
-EvalProm/007/NotasEstudiante.aspx,11
-EvalProm/008/Recuperaciones.aspx,2
 
-🚀 Inicialización del proyecto
-1️⃣ Requisitos
+- EvalProm/007/CopiarLogros.aspx,135
+- EvalProm/007/Indicadores.aspx,143
+- EvalProm/007/NotasEstudiante.aspx,11
+- EvalProm/008/Recuperaciones.aspx,2
 
-Node.js v18 o superior
+---
 
-npm o yarn
+## Requisitos
 
-2️⃣ Instalar dependencias
+- Node.js versión 18 o superior
+- npm
+
+---
+
+## Instalación
+
+Instalar Playwright:
+
+```bash
 npm install playwright
+```
 
+Instalar los navegadores de Playwright (solo la primera vez):
 
-Si es la primera vez que usas Playwright:
-
+```bash
 npx playwright install
+```
 
-3️⃣ Ejecutar el script
+## Ejecución
+
+Ejecutar el script con:
+
+```bash
 node index.js
+```
 
+El navegador se abrirá automáticamente y el proceso comenzará de forma secuencial.
 
-El navegador se abrirá automáticamente (modo no headless) y comenzará el proceso.
+## Funcionamiento interno
 
-⚙️ Funcionamiento interno (resumen técnico)
+- Usa Chromium mediante Playwright
+- Interactúa con un iframe
+- Selecciona servidores desde un <selector>
+- Ejecuta búsquedas por ruta
+- Espera cambios reales en el DOM (#totalRegistros)
+- Acumula los resultados en memoria
+- Genera el CSV una sola vez al finalizar
 
-Se usa Chromium vía Playwright
+## Configuración
 
-Se interactúa con un iframe
+Puedes modificar fácilmente en el script:
 
-Se selecciona cada servidor desde un <select>
+- La lista de servidores
+- El archivo de rutas
+- La URL del sistema
+- El modo headless del navegador
 
-Se envía la ruta al buscador
+## Notas
 
-Se espera un cambio real en el DOM (#totalRegistros)
-
-Se acumulan los totales en memoria
-
-El CSV se genera una sola vez al final
-
-🛠️ Configuración editable
-
-Dentro del script puedes modificar fácilmente:
-
-🗂️ Lista de servidores (opciones)
-
-📄 Archivo de rutas (rutas.txt)
-
-🌐 URL del sistema
-
-🤖 Modo headless (true / false)
-
-⚠️ Notas importantes
-
-El script asume que el iframe es único en la página
+El script asume que el iframe es único
 
 Si la estructura HTML cambia, puede ser necesario ajustar selectores
 
-Uso recomendado en entornos internos o controlados
+Uso recomendado en entornos internos
 
+## Autor
 
-🧑‍💻 Autor
+Script desarrollado para automatización y análisis de datos internos.
 
-Desarrollado para automatización interna y análisis de datos.
+---
+
+Si quieres, después lo podemos:
+
+- Convertir en **CLI**
+- Agregar **logs y manejo de errores**
+- Prepararlo para **ejecución en servidor (headless)**
