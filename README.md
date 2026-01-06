@@ -102,9 +102,3 @@ Uso recomendado en entornos internos
 Script desarrollado para automatización y análisis de datos internos.
 
 ---
-
-Si quieres, después lo podemos:
-
-- Convertir en **CLI**
-- Agregar **logs y manejo de errores**
-- Prepararlo para **ejecución en servidor (headless)**
